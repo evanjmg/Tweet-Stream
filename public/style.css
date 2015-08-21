@@ -1,0 +1,103 @@
+.header {
+  background: #0288D1;
+  padding:15px;
+}
+.search {
+  text-align: center;
+  max-width: 500px;
+  display:block;
+  margin: 0 auto;
+  color:white;
+}
+.results {
+  margin-top: 220px;
+  margin-left:10px;
+  margin-right: 10px;
+
+}
+
+.full-name {
+  font-weight: bold;
+  color:charcoal;
+}
+
+.text {
+  font-size: 11px;
+}
+.username {
+  font-weight: 300;
+  color:#0288D1;
+}
+.query {
+  margin:15px;
+}
+h1 {
+  font-weight:700;
+}
+body {
+  font-family: 'Open Sans';
+  background:#03A9F4;
+  color:white;
+}
+a {
+  color:white;
+  text-decoration: none;
+}
+a:hover {
+  background:#03A9F4;
+  text-decoration: none;
+}
+.tweet {
+  background: white;
+  color:black;
+  min-height: 130px;
+  padding:10px;
+  margin:10px;
+  border-radius:20px;
+}
+select {
+background: #0288D1;
+border:3px solid white;
+color:white;
+font-size: 0.9em;
+}
+.tweets {
+  /*padding-left:50px;
+  padding-right:50px;*/
+}
+input[type="text"] {
+  color: black;
+}
+img {
+  border-radius: 20px;
+  padding:10px;
+}
+@media only screen and (max-width: 800px) {
+  .results {
+    margin-top: 250px;
+  }
+  .tweet {
+    font-size:12px;
+    min-height: 160px;
+  }
+  .text {
+    margin-top: 20px;
+  }
+  img {
+    padding:1px;
+    display:block;
+  }
+
+/*h1 {
+  font-size: 30px;
+}*/
+}
+@media only screen and (max-width: 500px) {
+  .github-ribbon {
+    display: none;
+  }
+  .tweet {
+    font-size:8px;
+    min-height: 160px;
+  }
+  }

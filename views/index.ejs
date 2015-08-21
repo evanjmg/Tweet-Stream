@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+  <title>Tweet Stream</title>
+  <script type="text/javascript" src="socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.js"></script>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,800,800italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="github-ribbon">
+<a href="https://github.com/evanjmg"><img style="position: absolute; top: 0; right: 0; border: 0;z-index:1000;margin:-20px;" src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
+</div>
+  <div class="row header navbar navbar-fixed-top" style="z-index:-1;">
+    <div class="search">
+      <h1><%- header %></h1>
+      <form action="/" method="post" id='form'>
+        <select name="type" id="search-type">
+          <option value="By Keyword">By Keyword</option>
+          <option value="By Your Location">By Your Location</option>
+          <option value="By Location">By Location</option>
+        </select>
+
+        <input type="text" placeholder="Search Tweets" name="query" id="query">
+        <input type="submit" class="btn btn-success" value="Search">
+        <input type="button" class="btn btn-info" id="clear" value="Clear"> 
+      </form>
+      <br/>
+      <div class="row">
+      <div class="col-xs-6"><span id="counter">0</span> Tweets</div>
+      <div class="col-xs-6">
+      <p>
+       <a href="http://evanjmg.com"> Created by Evan Gillogley</a>
+      </p>
+      </div>
+      </div>
+    </div>
+  </div>
+  <div class="row results">
+    <div id="tweet-container-left" class="col-xs-6 tweets"></div>
+    <div id="tweet-container-right"  class="col-xs-6 tweets"></div>
+  </div>
+  <script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+  <script>
+  // Geolocation
+ function GeoL(position) {
+   latitude = position.coords.latitude;
+   longitude = position.coords.longitude;
+ }
+  var columnleft, latitude, longitude, type, bounds, boundsObject, counter=0;
+  // sendMessage
+  function sendMessage (query){
+    geocoder = new google.maps.Geocoder();
+    var socket = io();
+
+    switch ($('#search-type').val()) {
+      case 'By Location':
+      
+      geocoder.geocode( { 'address': query}, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+        bounds =  { 'A': String(results[0].geometry.viewport.getSouthWest().lng()),  'B': String(results[0].geometry.viewport.getSouthWest().lat()), 'C': String(results[0].geometry.viewport.getNorthEast().lng()), 'D': String(results[0].geometry.viewport.getNorthEast().lat()) }
+                   console.log(bounds);
+                   type = 'By Location';
+                   socket.emit('query', {'query': query, 'bounds' : bounds , 'type': type });
+        }});
+      
+      break;
+      case "By Your Location":
+      var latlng = new google.maps.LatLng(latitude, longitude);
+       geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+           if (status == google.maps.GeocoderStatus.OK) {
+               console.log(results);
+               bounds =  { 'A': String(results[0].geometry.viewport.getSouthWest().lng()),  'B': String(results[0].geometry.viewport.getSouthWest().lat()), 'C': String(results[0].geometry.viewport.getNorthEast().lng()), 'D': String(results[0].geometry.viewport.getNorthEast().lat()) }
+                console.log(bounds);
+                type = 'By Your Location';
+                socket.emit('query', {'query': query, 'bounds' : bounds , 'type': type });
+           } });
+  
+      break;
+      default: 
+      type = 'By Keyword';
+      socket.emit('query', {'query': query, 'bounds' : bounds , 'type': type });
+    }
+
+    
+
+    console.log('emit');
+    $('h1').html('Stream Tweets for '+query)
+  }
+// Onload
+  $(function(){
+     if (navigator.geolocation) {
+       navigator.geolocation.getCurrentPosition(GeoL)
+    }
+
+    $('#form').on('submit', function () {
+      event.preventDefault();
+      sendMessage($('#query').val());
+      console.log('clicked');
+    });
+    $('#clear').on('click', function () {
+     location.reload();
+    })
+    var socket = io();
+    socket.on('connect', function(){
+      console.log("Connected");
+    });
+    socket.on('tweets', function(tweet){
+      counter++;
+      $('#counter').html(String(counter));
+      var html = '<div class="row"><div class="tweet"><div class="col-xs-12 col-md-3 col-lg-3 col-xl-3"><img src="' + tweet.profile_image_url + '" class="avatar pull-left"/></div><div class="col-xs-12 col-md-9"><div class="names"><span class="full-name">' + tweet.name + ' </span><span class="username">@' +tweet.screen_name + '</span></div><div class="contents"><span class="text">' + (tweet.text).substring(0,80) + '...' + '</span></div></div></div></div>';
+      if (columnleft) {
+        $('#tweet-container-left').prepend(html);
+        columnleft = false;
+      }
+      else {
+        $('#tweet-container-right').prepend(html);
+        columnleft = true;
+      }
+
+
+      // console.log(tweet);
+    })
+  })
+
+</script>
+</body>
+</html>
